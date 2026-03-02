@@ -2,14 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from datetime import datetime
 
-st.set_page_config(page_title="VELÊRAYF Insights", layout="wide")
+st.set_page_config(page_title="VELÊRAYF Instagram Insights", layout="wide")
 
-# ── Clean white/blue style (like Instagram Insights light mode) ────────
+# ── Clean & colorful Instagram Insights style ─────────────────────────
 st.markdown("""
     <style>
     .main {background-color: #ffffff;}
-    h1, h2 {color: #000000; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
+    h1, h2, h3 {color: #000000; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
     .card {
         background: white;
         border-radius: 16px;
@@ -20,13 +21,14 @@ st.markdown("""
     }
     .highlight-green {color: #16a34a; font-weight: 700;}
     .metric-value {font-size: 48px; font-weight: 800; color: #1e40af;}
+    .metric-label {font-size: 16px; color: #64748b; margin-top: 4px;}
     </style>
 """, unsafe_allow_html=True)
 
 st.title("VELÊRAYF Instagram Insights")
 st.caption("Last 30 days • March 2026 • @velerayf")
 
-# ── Top content formats card ──────────────────────────────────────────
+# ── Top content formats section ───────────────────────────────────────
 with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     
@@ -68,6 +70,8 @@ with st.container():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+st.markdown("<br>", unsafe_allow_html=True)
+
 # ── Views section ─────────────────────────────────────────────────────
 with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
@@ -83,22 +87,28 @@ with st.container():
             <div class="highlight-green" style="font-size: 24px; margin-top: 8px;">
                 ↑ 965.1%
             </div>
+            <div class="metric-label">Views</div>
         """, unsafe_allow_html=True)
     
     with col_chart:
-        # Fixed same-length lists (10 dates + 10 values)
-        dates = pd.date_range(start="2026-02-02", periods=10, freq="3D")
-        views = [50, 120, 80, 350, 200, 520, 300, 680, 450, 950]  # matches screenshot curve
-    
+        # Exact dates from your screenshot (Feb 2 → Feb 27)
+        dates = pd.to_datetime([
+            "2026-02-02", "2026-02-07", "2026-02-12", "2026-02-17",
+            "2026-02-22", "2026-02-27"
+        ])
+        
+        # Approximate values matching the peaks and shape in your screenshot
+        views = [120, 80, 350, 520, 300, 950]  # ends high around 5.6K total
+        
         df_views = pd.DataFrame({"Date": dates, "Views": views})
-    
+        
         fig_views = px.line(
             df_views,
             x="Date",
             y="Views",
             markers=True,
             color_discrete_sequence=["#60a5fa"],
-            height=300
+            height=320
         )
         fig_views.update_traces(line=dict(width=3), marker_size=10)
         fig_views.update_layout(
@@ -106,7 +116,7 @@ with st.container():
             yaxis_title=None,
             showlegend=False,
             margin=dict(l=20, r=20, t=20, b=20),
-            yaxis=dict(range=[0, 1100]),
+            yaxis=dict(range=[0, 1100], tickvals=[0, 500, 1000], ticktext=["0", "500", "1K"]),
             xaxis=dict(tickformat="%b %d")
         )
         st.plotly_chart(fig_views, use_container_width=True)
@@ -114,4 +124,4 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.caption("© 2026 Instagram Insights • VELÊRAYF • Colombo, Sri Lanka")
+st.caption("© 2026 Instagram Insights • VELÊRAYF • Colombo, Sri Lanka • Built with Streamlit")
