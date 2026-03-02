@@ -1,132 +1,110 @@
 import streamlit as st
-import plotly.graph_objects as go
+import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="VELÊRAYF Insights", layout="wide")
 
-# ── Colorful modern theme ─────────────────────────────────────────────
+# ── Bright colorful theme ─────────────────────────────────────────────
 st.markdown("""
     <style>
-    .main {background: linear-gradient(135deg, #f5f7fa 0%, #e4e9fd 100%);}
-    .stApp {background: transparent;}
-    h1 {color: #1e3a8a; font-family: 'Segoe UI', sans-serif; font-weight: 700;}
+    .main {background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);}
+    h1 {color: #1e40af; text-align: center; font-weight: bold;}
     .metric-card {
         background: white;
         border-radius: 16px;
-        padding: 20px 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e5e7eb;
+        padding: 20px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
         text-align: center;
+        border: 1px solid #e5e7eb;
     }
-    .metric-title {font-size: 14px; color: #6b7280; margin-bottom: 8px;}
-    .metric-value {font-size: 32px; font-weight: 700; color: #1e40af;}
-    .content-bar {height: 32px; border-radius: 999px; overflow: hidden; margin: 8px 0;}
+    .metric-value {font-size: 2.5rem; font-weight: 800; color: #1d4ed8;}
+    .metric-title {font-size: 1rem; color: #64748b; margin-bottom: 8px;}
     </style>
 """, unsafe_allow_html=True)
 
-# ── Header ────────────────────────────────────────────────────────────
-st.markdown("<h1 style='text-align:center; margin-bottom:8px;'>VELÊRAYF Account Insights</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#4b5563; font-size:15px;'>Last 30 days • March 2026 • @velerayf</p>", unsafe_allow_html=True)
+st.title("VELÊRAYF Account Insights")
+st.markdown("<p style='text-align:center; color:#64748b;'>Last 30 days • March 2026 • @velerayf</p>", unsafe_allow_html=True)
 
-# ── Main metrics cards ────────────────────────────────────────────────
+# ── Metric cards ──────────────────────────────────────────────────────
 cols = st.columns(4)
 
-with cols[0]:
-    st.markdown("""
-    <div class="metric-card" style="border-left: 5px solid #eab308;">
-        <div class="metric-title">Views</div>
-        <div class="metric-value">5,464</div>
-    </div>
-    """, unsafe_allow_html=True)
+metrics = [
+    ("Views", "5,464", "#eab308"),
+    ("Accounts Reached", "898", "#f97316"),
+    ("Profile Visits", "527", "#06b6d4"),
+    ("Followers", "130", "#84cc16")
+]
 
-with cols[1]:
-    st.markdown("""
-    <div class="metric-card" style="border-left: 5px solid #f97316;">
-        <div class="metric-title">Accounts Reached</div>
-        <div class="metric-value">898</div>
-    </div>
-    """, unsafe_allow_html=True)
+for col, (label, value, color) in zip(cols, metrics):
+    with col:
+        st.markdown(f"""
+        <div class="metric-card" style="border-top: 5px solid {color};">
+            <div class="metric-title">{label}</div>
+            <div class="metric-value">{value}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-with cols[2]:
-    st.markdown("""
-    <div class="metric-card" style="border-left: 5px solid #06b6d4;">
-        <div class="metric-title">Profile Visits</div>
-        <div class="metric-value">527</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with cols[3]:
-    st.markdown("""
-    <div class="metric-card" style="border-left: 5px solid #84cc16;">
-        <div class="metric-title">Followers</div>
-        <div class="metric-value">130</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
 
 # ── Views section ─────────────────────────────────────────────────────
 st.subheader("Views")
 
-col_gauge, col_bar = st.columns([1.2, 3])
+col_left, col_right = st.columns([1.3, 3.7])
 
-with col_gauge:
-    followers_pct = 40.6
+with col_left:
     fig_gauge = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = followers_pct,
-        number = {'font': {'size': 48, 'color': '#1e40af'}},
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Followers %", 'font': {'size': 18}},
-        gauge = {
-            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#1e40af"},
+        mode="gauge+number",
+        value=40.6,
+        number={'font': {'size': 50, 'color': '#1e40af'}},
+        title={'text': "Followers %", 'font': {'size': 20}},
+        gauge={
+            'axis': {'range': [0, 100]},
             'bar': {'color': "#3b82f6"},
-            'bgcolor': "lightgray",
-            'borderwidth': 2,
+            'bgcolor': "#e5e7eb",
             'steps': [
-                {'range': [0, followers_pct], 'color': 'rgba(59,130,246,0.4)'},
-                {'range': [followers_pct, 100], 'color': 'rgba(200,200,200,0.3)'}
+                {'range': [0, 40.6], 'color': 'rgba(59,130,246,0.35)'},
+                {'range': [40.6, 100], 'color': 'rgba(200,200,200,0.3)'}
             ]
         }
     ))
-    fig_gauge.update_layout(height=220, margin=dict(l=0,r=0,t=20,b=0))
+    fig_gauge.update_layout(height=240, margin=dict(l=0,r=0,t=30,b=0))
     st.plotly_chart(fig_gauge, use_container_width=True)
-    st.caption(f"Non-followers: 59.4%")
+    st.caption("Non-followers: 59.4%")
 
-with col_bar:
-    content_data = pd.DataFrame({
+with col_right:
+    content_df = pd.DataFrame({
         "Type": ["Posts", "Reels", "Stories"],
-        "Percentage": [46.5, 46.1, 7.4],
-        "Color": ["#ec4899", "#8b5cf6", "#f43f5e"]
+        "Percentage": [46.5, 46.1, 7.4]
     })
 
     fig_bar = px.bar(
-        content_data,
+        content_df,
         x="Percentage",
         y="Type",
         orientation="h",
-        color="Type",
-        color_discrete_sequence=content_data["Color"],
         text_auto=True,
-        title="By content type"
+        title="By content type",
+        color="Type",
+        color_discrete_sequence=["#ec4899", "#8b5cf6", "#f43f5e"]
     )
-    fig_bar.update_traces(textposition="auto", textfont_size=14, marker_line_width=0)
+    fig_bar.update_traces(textposition="auto", textfont_size=14)
     fig_bar.update_layout(
         xaxis_title=None,
         yaxis_title=None,
         showlegend=False,
-        height=260,
-        margin=dict(l=20,r=20,t=40,b=20),
-        plot_bgcolor="rgba(0,0,0,0)",
+        height=280,
+        margin=dict(l=20,r=20,t=50,b=20),
+        plot_bgcolor="rgba(255,255,255,0.6)",
         paper_bgcolor="rgba(0,0,0,0)"
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
 # ── Top content cards ─────────────────────────────────────────────────
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("---")
 st.subheader("Top content based on views")
 
-top_data = [
+top_posts = [
     {"views":709, "date":"Feb 28", "label":"Giveaway – Elevate Your Style", "color":"#ec4899"},
     {"views":630, "date":"Feb 13", "label":"Blue sapphire earring",         "color":"#8b5cf6"},
     {"views":517, "date":"Feb 9",  "label":"Green emerald ring",            "color":"#06b6d4"},
@@ -135,24 +113,25 @@ top_data = [
 ]
 
 cols = st.columns(5)
-for i, item in enumerate(top_data):
-    with cols[i]:
+for col, post in zip(cols, top_posts):
+    with col:
         st.markdown(f"""
         <div style="
-            background: linear-gradient(135deg, {item['color']}22 0%, white 100%);
+            background: linear-gradient(135deg, {post['color']}22 0%, white 100%);
             border-radius: 16px;
-            padding: 16px;
+            padding: 16px 12px;
             text-align: center;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            border: 1px solid {item['color']}44;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 1px solid {post['color']}40;
+            min-height: 180px;
         ">
-            <div style="font-size: 36px; font-weight: 800; color: #1e40af;">{item['views']}</div>
-            <div style="font-size: 13px; color: #6b7280; margin: 4px 0;">{item['date']}</div>
-            <div style="font-size: 14px; color: #374151; line-height: 1.3;">
-                {item['label'][:38]}{'...' if len(item['label']) > 38 else ''}
+            <div style="font-size: 2.8rem; font-weight: 900; color: #1e40af;">{post['views']}</div>
+            <div style="font-size: 0.9rem; color: #64748b; margin: 4px 0;">{post['date']}</div>
+            <div style="font-size: 0.95rem; color: #1f2937; line-height: 1.4;">
+                {post['label'][:38]}{'...' if len(post['label']) > 38 else ''}
             </div>
         </div>
         """, unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.caption("Dashboard built for VELÊRAYF • March 2026 • Colombo, LK")
+st.caption("VELÊRAYF Dashboard • March 2026 • Colombo, Sri Lanka")
