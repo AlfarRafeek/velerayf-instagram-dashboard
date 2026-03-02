@@ -1,189 +1,158 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
+import plotly.express as px
 
-st.set_page_config(page_title="VELÊRAYF Insights Dashboard", layout="wide")
+st.set_page_config(page_title="VELÊRAYF Insights", layout="wide")
 
-# ── Dark Instagram-like theme ────────────────────────────────────────
+# ── Colorful modern theme ─────────────────────────────────────────────
 st.markdown("""
     <style>
-    .main {background-color: #0f0f0f; color: white;}
-    .stApp {background-color: #0f0f0f;}
-    h1, h2, h3 {color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
-    .stMetric {background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #333;}
-    .block-container {padding-top: 1rem !important;}
-    section[data-testid="stSidebar"] {background-color: #111;}
+    .main {background: linear-gradient(135deg, #f5f7fa 0%, #e4e9fd 100%);}
+    .stApp {background: transparent;}
+    h1 {color: #1e3a8a; font-family: 'Segoe UI', sans-serif; font-weight: 700;}
+    .metric-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        text-align: center;
+    }
+    .metric-title {font-size: 14px; color: #6b7280; margin-bottom: 8px;}
+    .metric-value {font-size: 32px; font-weight: 700; color: #1e40af;}
+    .content-bar {height: 32px; border-radius: 999px; overflow: hidden; margin: 8px 0;}
     </style>
 """, unsafe_allow_html=True)
 
-# ── Title ─────────────────────────────────────────────────────────────
-st.title("VELÊRAYF Account Insights")
-st.caption("Last 30 days • March 2026 • @velerayf")
+# ── Header ────────────────────────────────────────────────────────────
+st.markdown("<h1 style='text-align:center; margin-bottom:8px;'>VELÊRAYF Account Insights</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#4b5563; font-size:15px;'>Last 30 days • March 2026 • @velerayf</p>", unsafe_allow_html=True)
 
-# ── Key metrics row ───────────────────────────────────────────────────
-col1, col2, col3, col4 = st.columns(4)
+# ── Main metrics cards ────────────────────────────────────────────────
+cols = st.columns(4)
 
-with col1:
-    st.metric("Views", "5,464", help="Total views in selected period")
+with cols[0]:
+    st.markdown("""
+    <div class="metric-card" style="border-left: 5px solid #eab308;">
+        <div class="metric-title">Views</div>
+        <div class="metric-value">5,464</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with col2:
-    st.metric("Accounts Reached", "898")
+with cols[1]:
+    st.markdown("""
+    <div class="metric-card" style="border-left: 5px solid #f97316;">
+        <div class="metric-title">Accounts Reached</div>
+        <div class="metric-value">898</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with col3:
-    st.metric("Profile Visits", "527")
+with cols[2]:
+    st.markdown("""
+    <div class="metric-card" style="border-left: 5px solid #06b6d4;">
+        <div class="metric-title">Profile Visits</div>
+        <div class="metric-value">527</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-with col4:
-    st.metric("Followers", "130")
+with cols[3]:
+    st.markdown("""
+    <div class="metric-card" style="border-left: 5px solid #84cc16;">
+        <div class="metric-title">Followers</div>
+        <div class="metric-value">130</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# ── Views split (donut-like) ──────────────────────────────────────────
+st.markdown("<br>", unsafe_allow_html=True)
+
+# ── Views section ─────────────────────────────────────────────────────
 st.subheader("Views")
-col_left, col_right = st.columns([1, 3])
 
-with col_left:
+col_gauge, col_bar = st.columns([1.2, 3])
+
+with col_gauge:
     followers_pct = 40.6
-    non_followers_pct = 59.4
-
-    fig_views_split = go.Figure(go.Indicator(
+    fig_gauge = go.Figure(go.Indicator(
         mode = "gauge+number",
         value = followers_pct,
+        number = {'font': {'size': 48, 'color': '#1e40af'}},
         domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Followers"},
+        title = {'text': "Followers %", 'font': {'size': 18}},
         gauge = {
-            'axis': {'range': [0, 100]},
-            'bar': {'color': "#C13584"},
+            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#1e40af"},
+            'bar': {'color': "#3b82f6"},
+            'bgcolor': "lightgray",
+            'borderwidth': 2,
             'steps': [
-                {'range': [0, followers_pct], 'color': "#C13584"},
-                {'range': [followers_pct, 100], 'color': "#4a4a4a"}
-            ],
-            'threshold': {'line': {'color': "white", 'width': 2}, 'thickness': 0.8, 'value': followers_pct}
+                {'range': [0, followers_pct], 'color': 'rgba(59,130,246,0.4)'},
+                {'range': [followers_pct, 100], 'color': 'rgba(200,200,200,0.3)'}
+            ]
         }
     ))
-    fig_views_split.update_layout(height=180, margin=dict(l=10,r=10,t=30,b=10), template="plotly_dark")
-    st.plotly_chart(fig_views_split, use_container_width=True)
+    fig_gauge.update_layout(height=220, margin=dict(l=0,r=0,t=20,b=0))
+    st.plotly_chart(fig_gauge, use_container_width=True)
+    st.caption(f"Non-followers: 59.4%")
 
-    st.caption(f"Non-followers: {non_followers_pct}%")
-
-with col_right:
+with col_bar:
     content_data = pd.DataFrame({
         "Type": ["Posts", "Reels", "Stories"],
-        "Percentage": [46.5, 46.1, 7.4]
+        "Percentage": [46.5, 46.1, 7.4],
+        "Color": ["#ec4899", "#8b5cf6", "#f43f5e"]
     })
 
-    fig_content = px.bar(
+    fig_bar = px.bar(
         content_data,
         x="Percentage",
         y="Type",
         orientation="h",
         color="Type",
-        color_discrete_sequence=["#C13584", "#833AB4", "#E1306C"],
-        title="By content type",
-        text_auto=True
+        color_discrete_sequence=content_data["Color"],
+        text_auto=True,
+        title="By content type"
     )
-    fig_content.update_layout(
-        template="plotly_dark",
-        showlegend=False,
+    fig_bar.update_traces(textposition="auto", textfont_size=14, marker_line_width=0)
+    fig_bar.update_layout(
         xaxis_title=None,
         yaxis_title=None,
-        height=220,
-        margin=dict(l=10,r=10,t=40,b=10)
+        showlegend=False,
+        height=260,
+        margin=dict(l=20,r=20,t=40,b=20),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)"
     )
-    fig_content.update_traces(textposition="auto", textfont_size=14)
-    st.plotly_chart(fig_content, use_container_width=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
 
-# ── Top content grid ──────────────────────────────────────────────────
+# ── Top content cards ─────────────────────────────────────────────────
+st.markdown("<br>", unsafe_allow_html=True)
 st.subheader("Top content based on views")
 
-top_posts = [
-    {"views": 709,  "date": "Feb 28", "label": "Giveaway – Elevate Your Style", "color": "#C13584"},
-    {"views": 630,  "date": "Feb 13", "label": "Blue sapphire earring",         "color": "#833AB4"},
-    {"views": 517,  "date": "Feb 9",  "label": "Green emerald ring",            "color": "#E1306C"},
-    {"views": 478,  "date": "Feb 17", "label": "Necklace / Reel",               "color": "#F56040"},
-    {"views": 410,  "date": "Jan 28", "label": "Post – early content",          "color": "#FCAF45"}
+top_data = [
+    {"views":709, "date":"Feb 28", "label":"Giveaway – Elevate Your Style", "color":"#ec4899"},
+    {"views":630, "date":"Feb 13", "label":"Blue sapphire earring",         "color":"#8b5cf6"},
+    {"views":517, "date":"Feb 9",  "label":"Green emerald ring",            "color":"#06b6d4"},
+    {"views":478, "date":"Feb 17", "label":"Necklace / Reel",               "color":"#84cc16"},
+    {"views":410, "date":"Jan 28", "label":"Post – early content",          "color":"#eab308"}
 ]
 
 cols = st.columns(5)
-for i, post in enumerate(top_posts):
+for i, item in enumerate(top_data):
     with cols[i]:
         st.markdown(f"""
         <div style="
-            background: linear-gradient(135deg, {post['color']}22, #111);
-            border-radius: 12px;
-            padding: 12px;
+            background: linear-gradient(135deg, {item['color']}22 0%, white 100%);
+            border-radius: 16px;
+            padding: 16px;
             text-align: center;
-            border: 1px solid {post['color']};
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border: 1px solid {item['color']}44;
         ">
-            <div style="font-size: 28px; font-weight: bold; color: white;">{post['views']}</div>
-            <div style="font-size: 13px; color: #aaa;">{post['date']}</div>
-            <div style="font-size: 14px; margin-top: 8px;">{post['label'][:30]}{'...' if len(post['label']) > 30 else ''}</div>
+            <div style="font-size: 36px; font-weight: 800; color: #1e40af;">{item['views']}</div>
+            <div style="font-size: 13px; color: #6b7280; margin: 4px 0;">{item['date']}</div>
+            <div style="font-size: 14px; color: #374151; line-height: 1.3;">
+                {item['label'][:38]}{'...' if len(item['label']) > 38 else ''}
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-# ── Interactions section ──────────────────────────────────────────────
-st.markdown("---")
-st.subheader("Interactions")
-col_i1, col_i2 = st.columns([1, 3])
-
-with col_i1:
-    st.metric("Total Interactions", "717")
-
-    fig_inter_split = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = 84.2,
-        title = {'text': "Followers"},
-        gauge = {
-            'axis': {'range': [0, 100]},
-            'bar': {'color': "#C13584"},
-            'steps': [{'range': [0, 84.2], 'color': "#C13584"}, {'range': [84.2, 100], 'color': "#333"}]
-        }
-    ))
-    fig_inter_split.update_layout(height=180, margin=dict(l=0,r=0,t=0,b=0), template="plotly_dark")
-    st.plotly_chart(fig_inter_split, use_container_width=True)
-    st.caption("Non-followers: 15.8%")
-
-with col_i2:
-    inter_content = pd.DataFrame({
-        "Type": ["Posts", "Reels", "Stories"],
-        "Percentage": [56.6, 43.2, 0.1]
-    })
-
-    fig_inter_bar = px.bar(
-        inter_content,
-        x="Percentage",
-        y="Type",
-        orientation="h",
-        color="Type",
-        color_discrete_sequence=["#C13584", "#833AB4", "#444"],
-        title="By content interactions",
-        text_auto=True
-    )
-    fig_inter_bar.update_layout(template="plotly_dark", showlegend=False, height=220, margin=dict(l=10,r=10,t=40,b=10))
-    st.plotly_chart(fig_inter_bar, use_container_width=True)
-
-# ── Active times bar ──────────────────────────────────────────────────
-st.markdown("---")
-st.subheader("Most active times")
-
-hours = ["12a","3a","6a","9a","12p","3p","6p","9p"]
-values = [36,38,36,33,14,15,26,35]
-
-fig_active = go.Figure()
-fig_active.add_trace(go.Bar(
-    y=hours,
-    x=values,
-    orientation='h',
-    marker_color="#C13584",
-    text=values,
-    textposition='auto'
-))
-fig_active.update_layout(
-    title="Followers activity by hour",
-    xaxis_title="Activity level",
-    yaxis_title="Time of day",
-    template="plotly_dark",
-    height=400,
-    margin=dict(l=40,r=20,t=50,b=40)
-)
-st.plotly_chart(fig_active, use_container_width=True)
-
-st.caption("© 2026 Instagram Insights • VELÊRAYF • Colombo, LK")
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.caption("Dashboard built for VELÊRAYF • March 2026 • Colombo, LK")
