@@ -2,149 +2,188 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
-import base64  # For potential image handling if you add thumbnails
 
-# Set page config for wide layout and theme
-st.set_page_config(
-    page_title="VELÊRAYF Advanced Instagram Dashboard",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="VELÊRAYF Insights Dashboard", layout="wide")
 
-# Custom CSS for luxury theme (black/gold)
+# ── Dark Instagram-like theme ────────────────────────────────────────
 st.markdown("""
     <style>
-    .main {background-color: #000000; color: #FFFFFF;}
-    .stMetric {color: #D4AF37;}
-    .stButton > button {background-color: #D4AF37; color: #000000;}
-    .sidebar .sidebar-content {background-color: #1A1A1A;}
-    h1, h2, h3 {color: #D4AF37; font-family: 'Cinzel', serif;}
+    .main {background-color: #0f0f0f; color: white;}
+    .stApp {background-color: #0f0f0f;}
+    h1, h2, h3 {color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, sans-serif;}
+    .stMetric {background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #333;}
+    .block-container {padding-top: 1rem !important;}
+    section[data-testid="stSidebar"] {background-color: #111;}
     </style>
 """, unsafe_allow_html=True)
 
-# ───────────────────────────────────────────────
-# Sidebar: Data Upload & Filters
-# ───────────────────────────────────────────────
-st.sidebar.title("Dashboard Controls")
-uploaded_file = st.sidebar.file_uploader("Upload instagram_data.xlsx", type=["xlsx", "csv"])
+# ── Title ─────────────────────────────────────────────────────────────
+st.title("VELÊRAYF Account Insights")
+st.caption("Last 30 days • March 2026 • @velerayf")
 
-if uploaded_file is not None:
-    if uploaded_file.name.endswith('.xlsx'):
-        df = pd.read_excel(uploaded_file)
-    else:
-        df = pd.read_csv(uploaded_file)
-    df['Date'] = pd.to_datetime(df['Date'])
-    st.sidebar.success(f"Loaded {len(df)} posts!")
-else:
-    # Advanced sample data (expanded with more rows for demo)
-    data = {
-        'Date': pd.date_range(start='2026-01-24', periods=17, freq='D'),
-        'Post Type': ['Post', 'Image', 'Image', 'Reel', 'Reel', 'Post', 'Story', 'Carousel', 'Reel', 'Post', 'Image', 'Reel', 'Post', 'Story', 'Image', 'Reel', 'Post'],
-        'Reach': [500, 600, 550, 700, 650, 800, 200, 400, 750, 900, 630, 517, 489, 150, 427, 366, 707],
-        'Engagement': [50, 60, 55, 70, 65, 80, 20, 40, 75, 90, 63, 52, 49, 15, 43, 37, 105],
-        'Likes': [19, 20, 18, 25, 22, 30, 5, 15, 28, 35, 21, 19, 17, 3, 16, 12, 19],
-        'Comments': [3, 4, 2, 5, 3, 6, 1, 2, 4, 7, 3, 2, 1, 0, 2, 1, 3],
-        'Shares': [81, 85, 80, 90, 88, 95, 10, 30, 92, 100, 86, 82, 78, 5, 79, 70, 81],
-        'Followers': [130, 128, 126, 124, 122, 120, 118, 116, 114, 112, 110, 108, 106, 104, 102, 100, 98],
-        'Country': ['Sri Lanka'] * 17,
-        'City': ['Colombo'] * 17
-    }
-    df = pd.DataFrame(data)
-    st.sidebar.info("Using sample data. Upload your file for real insights!")
+# ── Key metrics row ───────────────────────────────────────────────────
+col1, col2, col3, col4 = st.columns(4)
 
-# Filters
-st.sidebar.subheader("Filters")
-min_date = df['Date'].min()
-max_date = df['Date'].max()
-date_range = st.sidebar.date_input("Date Range", (min_date, max_date))
-post_types = st.sidebar.multiselect("Post Types", options=df['Post Type'].unique(), default=df['Post Type'].unique())
+with col1:
+    st.metric("Views", "5,464", help="Total views in selected period")
 
-# Apply filters
-df_filtered = df[(df['Date'] >= pd.to_datetime(date_range[0])) & (df['Date'] <= pd.to_datetime(date_range[1]))]
-df_filtered = df_filtered[df_filtered['Post Type'].isin(post_types)]
+with col2:
+    st.metric("Accounts Reached", "898")
 
-# ───────────────────────────────────────────────
-# Main Content: Multipage-like Tabs
-# ───────────────────────────────────────────────
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 Overview", "📊 Performance Charts", "🖼️ Top Content", "👥 Audience Insights"])
+with col3:
+    st.metric("Profile Visits", "527")
 
-with tab1:
-    st.header("Key Metrics Overview")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    
-    total_views = df_filtered['Views'].sum() if 'Views' in df_filtered else df_filtered['Reach'].sum()  # Fallback to Reach if no Views
-    avg_engagement = df_filtered['Engagement'].mean()
-    total_reach = df_filtered['Reach'].sum()
-    follower_growth = df_filtered['Followers'].max() - df_filtered['Followers'].min()
-    top_city = df_filtered['City'].mode()[0] if not df_filtered.empty else "N/A"
-    
-    col1.metric("Total Views/Reach", f"{total_views:,}")
-    col2.metric("Avg Engagement", f"{avg_engagement:.1f}")
-    col3.metric("Total Reach", f"{total_reach:,}")
-    col4.metric("Follower Growth", f"+{follower_growth}")
-    col5.metric("Top City", top_city)
+with col4:
+    st.metric("Followers", "130")
 
-    st.subheader("Quick Summary")
-    st.markdown("Your luxury jewellery posts with giveaways drive high shares. Non-followers contribute 61%, indicating strong organic discovery.")
+# ── Views split (donut-like) ──────────────────────────────────────────
+st.subheader("Views")
+col_left, col_right = st.columns([1, 3])
 
-with tab2:
-    st.header("Advanced Performance Visuals")
-    
-    # 1. Follower Growth Line + Area
-    fig_followers = go.Figure()
-    fig_followers.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Followers'], mode='lines+markers', name='Followers', line=dict(color='#D4AF37')))
-    fig_followers.add_trace(go.Scatter(x=df_filtered['Date'], y=df_filtered['Followers'], fill='tozeroy', name='Growth Area', fillcolor='rgba(212, 175, 55, 0.3)'))
-    fig_followers.update_layout(title="Follower Growth Trend", xaxis_title="Date", yaxis_title="Followers", template="plotly_dark")
-    st.plotly_chart(fig_followers, use_container_width=True)
-    
-    # 2. Engagement Heatmap (by Date & Post Type)
-    heatmap_data = df_filtered.pivot_table(index='Date', columns='Post Type', values='Engagement', aggfunc='sum').fillna(0)
-    fig_heatmap = px.imshow(heatmap_data, title="Engagement Heatmap (Darker = Higher)", color_continuous_scale="YlOrRd")
-    fig_heatmap.update_layout(template="plotly_dark")
-    st.plotly_chart(fig_heatmap, use_container_width=True)
-    
-    # 3. Scatter: Views vs Engagement
-    fig_scatter = px.scatter(df_filtered, x='Views', y='Engagement', color='Post Type', size='Likes', hover_data=['Date', 'Post Type'],
-                             title="Views vs Engagement (Bubble Size = Likes)", template="plotly_dark")
-    st.plotly_chart(fig_scatter, use_container_width=True)
+with col_left:
+    followers_pct = 40.6
+    non_followers_pct = 59.4
 
-with tab3:
-    st.header("Top Performing Content")
-    top_posts = df_filtered.sort_values('Views', ascending=False).head(10)
-    st.dataframe(top_posts[['Date', 'Post Type', 'Views', 'Engagement', 'Likes', 'Comments', 'Shares']])
-    
-    # Interactive expander for details
-    for i, row in top_posts.iterrows():
-        with st.expander(f"{row['Post Type']} on {row['Date'].date()} – {row['Views']} Views"):
-            st.write(f"Engagement: {row['Engagement']}")
-            # If you have images: st.image("images/post_" + str(i) + ".jpg")
-    
-    st.download_button("Export Top Posts CSV", top_posts.to_csv(), file_name="top_posts.csv")
+    fig_views_split = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = followers_pct,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Followers"},
+        gauge = {
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "#C13584"},
+            'steps': [
+                {'range': [0, followers_pct], 'color': "#C13584"},
+                {'range': [followers_pct, 100], 'color': "#4a4a4a"}
+            ],
+            'threshold': {'line': {'color': "white", 'width': 2}, 'thickness': 0.8, 'value': followers_pct}
+        }
+    ))
+    fig_views_split.update_layout(height=180, margin=dict(l=10,r=10,t=30,b=10), template="plotly_dark")
+    st.plotly_chart(fig_views_split, use_container_width=True)
 
-with tab4:
-    st.header("Audience Breakdown")
-    col_a, col_b = st.columns(2)
-    
-    with col_a:
-        st.subheader("Gender Distribution")
-        gender_data = {'Gender': ['Men', 'Women'], 'Percentage': [61.1, 38.9]}  # Update with real if available
-        fig_gender = px.pie(pd.DataFrame(gender_data), values='Percentage', names='Gender', hole=0.3, template="plotly_dark")
-        st.plotly_chart(fig_gender)
-    
-    with col_b:
-        st.subheader("Age Ranges")
-        age_data = {'Age': ['18-24', '25-34', '35+'], 'Percentage': [74, 16, 10]}
-        fig_age = px.bar(pd.DataFrame(age_data), x='Age', y='Percentage', template="plotly_dark", color_discrete_sequence=['#D4AF37'])
-        st.plotly_chart(fig_age)
-    
-    st.subheader("Top Locations")
-    location_data = df_filtered.groupby('City').size().reset_index(name='Count').sort_values('Count', ascending=False)
-    fig_location = px.bar(location_data, x='City', y='Count', template="plotly_dark")
-    st.plotly_chart(fig_location, use_container_width=True)
+    st.caption(f"Non-followers: {non_followers_pct}%")
 
-# ───────────────────────────────────────────────
-# Footer
-# ───────────────────────────────────────────────
+with col_right:
+    content_data = pd.DataFrame({
+        "Type": ["Posts", "Reels", "Stories"],
+        "Percentage": [46.5, 46.1, 7.4]
+    })
+
+    fig_content = px.bar(
+        content_data,
+        x="Percentage",
+        y="Type",
+        orientation="h",
+        color="Type",
+        color_discrete_sequence=["#C13584", "#833AB4", "#E1306C"],
+        title="By content type",
+        text_auto=True
+    )
+    fig_content.update_layout(
+        template="plotly_dark",
+        showlegend=False,
+        xaxis_title=None,
+        yaxis_title=None,
+        height=220,
+        margin=dict(l=10,r=10,t=40,b=10)
+    )
+    fig_content.update_traces(textposition="auto", textfont_size=14)
+    st.plotly_chart(fig_content, use_container_width=True)
+
+# ── Top content grid ──────────────────────────────────────────────────
+st.subheader("Top content based on views")
+
+top_posts = [
+    {"views": 709,  "date": "Feb 28", "label": "Giveaway – Elevate Your Style", "color": "#C13584"},
+    {"views": 630,  "date": "Feb 13", "label": "Blue sapphire earring",         "color": "#833AB4"},
+    {"views": 517,  "date": "Feb 9",  "label": "Green emerald ring",            "color": "#E1306C"},
+    {"views": 478,  "date": "Feb 17", "label": "Necklace / Reel",               "color": "#F56040"},
+    {"views": 410,  "date": "Jan 28", "label": "Post – early content",          "color": "#FCAF45"}
+]
+
+cols = st.columns(5)
+for i, post in enumerate(top_posts):
+    with cols[i]:
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, {post['color']}22, #111);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid {post['color']};
+        ">
+            <div style="font-size: 28px; font-weight: bold; color: white;">{post['views']}</div>
+            <div style="font-size: 13px; color: #aaa;">{post['date']}</div>
+            <div style="font-size: 14px; margin-top: 8px;">{post['label'][:30]}{'...' if len(post['label']) > 30 else ''}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ── Interactions section ──────────────────────────────────────────────
 st.markdown("---")
-st.caption("VELÊRAYF Analytics Dashboard • Built with Streamlit • Data from Instagram Insights • Alfar, March 2026")
+st.subheader("Interactions")
+col_i1, col_i2 = st.columns([1, 3])
+
+with col_i1:
+    st.metric("Total Interactions", "717")
+
+    fig_inter_split = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = 84.2,
+        title = {'text': "Followers"},
+        gauge = {
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "#C13584"},
+            'steps': [{'range': [0, 84.2], 'color': "#C13584"}, {'range': [84.2, 100], 'color': "#333"}]
+        }
+    ))
+    fig_inter_split.update_layout(height=180, margin=dict(l=0,r=0,t=0,b=0), template="plotly_dark")
+    st.plotly_chart(fig_inter_split, use_container_width=True)
+    st.caption("Non-followers: 15.8%")
+
+with col_i2:
+    inter_content = pd.DataFrame({
+        "Type": ["Posts", "Reels", "Stories"],
+        "Percentage": [56.6, 43.2, 0.1]
+    })
+
+    fig_inter_bar = px.bar(
+        inter_content,
+        x="Percentage",
+        y="Type",
+        orientation="h",
+        color="Type",
+        color_discrete_sequence=["#C13584", "#833AB4", "#444"],
+        title="By content interactions",
+        text_auto=True
+    )
+    fig_inter_bar.update_layout(template="plotly_dark", showlegend=False, height=220, margin=dict(l=10,r=10,t=40,b=10))
+    st.plotly_chart(fig_inter_bar, use_container_width=True)
+
+# ── Active times bar ──────────────────────────────────────────────────
+st.markdown("---")
+st.subheader("Most active times")
+
+hours = ["12a","3a","6a","9a","12p","3p","6p","9p"]
+values = [36,38,36,33,14,15,26,35]
+
+fig_active = go.Figure()
+fig_active.add_trace(go.Bar(
+    y=hours,
+    x=values,
+    orientation='h',
+    marker_color="#C13584",
+    text=values,
+    textposition='auto'
+))
+fig_active.update_layout(
+    title="Followers activity by hour",
+    xaxis_title="Activity level",
+    yaxis_title="Time of day",
+    template="plotly_dark",
+    height=400,
+    margin=dict(l=40,r=20,t=50,b=40)
+)
+st.plotly_chart(fig_active, use_container_width=True)
+
+st.caption("© 2026 Instagram Insights • VELÊRAYF • Colombo, LK")
